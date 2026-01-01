@@ -1,5 +1,5 @@
 'use client';
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import type { MenuItem } from '@/types';
 
 type CartItem = {
@@ -27,6 +27,27 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [isInitialized, setIsInitialized] = useState(false);
+
+    // Load from localStorage on mount
+    useEffect(() => {
+        const savedCart = localStorage.getItem('cartItems');
+        if (savedCart) {
+            try {
+                setCartItems(JSON.parse(savedCart));
+            } catch (e) {
+                console.error('Failed to parse cart from localStorage', e);
+            }
+        }
+        setIsInitialized(true);
+    }, []);
+
+    // Save to localStorage whenever cartItems changes
+    useEffect(() => {
+        if (isInitialized) {
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        }
+    }, [cartItems, isInitialized]);
 
     const addItem = (item: CartItem) => {
         setCartItems((prev) => {
@@ -57,6 +78,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const clearCart = () => setCartItems([]);
+
+    // Prevent hydration mismatch by not rendering until initialized
+    if (!isInitialized) {
+        return null;
+    }
 
     return (
         <CartContext.Provider

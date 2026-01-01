@@ -66,6 +66,7 @@ export interface Order {
     total: number;
     payment_method: string;
     payment_status: string;
+    order_status: string;
     delivery_address: string;
     $createdAt: string;
     $updatedAt: string;

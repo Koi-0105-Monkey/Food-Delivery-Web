@@ -1,11 +1,21 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ShoppingCart, User, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { user, loading } = useAuth();
+    const pathname = usePathname();
+
+    // Import usePathname from next/navigation at the top if not present, but wait, I see imports.
+    // wait, I need to check if usePathname is imported. The code has import from next/link and lucide-react. 
+    // It does NOT have usePathname imported. I must modify imports too.
+
+    if (pathname?.startsWith('/admin')) return null;
 
     return (
         <nav className="sticky top-0 z-50 bg-white shadow-md">
@@ -50,14 +60,26 @@ export default function Navbar() {
                             </span>
                         </Link>
 
-                        {/* User */}
-                        <Link
-                            href="/auth/signin"
-                            className="hidden md:flex items-center gap-2 px-4 py-2 bg-[#FE8C00] text-white rounded-full hover:bg-[#E67D00] transition-colors font-medium"
-                        >
-                            <User className="w-5 h-5" />
-                            Sign In
-                        </Link>
+                        {/* User or Sign In */}
+                        {!loading && (
+                            user ? (
+                                <Link
+                                    href="/profile"
+                                    className="hidden md:flex items-center gap-2 px-4 py-2 bg-[#FFF5E6] text-[#FE8C00] rounded-full hover:bg-[#FFE0B2] transition-colors font-medium"
+                                >
+                                    <User className="w-5 h-5" />
+                                    <span>{user.name}</span>
+                                </Link>
+                            ) : (
+                                <Link
+                                    href="/login"
+                                    className="hidden md:flex items-center gap-2 px-4 py-2 bg-[#FE8C00] text-white rounded-full hover:bg-[#E67D00] transition-colors font-medium"
+                                >
+                                    <User className="w-5 h-5" />
+                                    Sign In
+                                </Link>
+                            )
+                        )}
 
                         {/* Mobile Menu Button */}
                         <button
@@ -105,14 +127,27 @@ export default function Navbar() {
                             >
                                 Contact
                             </Link>
-                            <Link
-                                href="/auth/signin"
-                                className="flex items-center justify-center gap-2 px-4 py-3 bg-[#FE8C00] text-white rounded-full hover:bg-[#E67D00] transition-colors font-medium"
-                                onClick={() => setIsMenuOpen(false)}
-                            >
-                                <User className="w-5 h-5" />
-                                Sign In
-                            </Link>
+                            {!loading && (
+                                user ? (
+                                    <Link
+                                        href="/profile"
+                                        className="flex items-center justify-center gap-2 px-4 py-3 bg-[#FE8C00]/10 text-[#FE8C00] rounded-full font-medium"
+                                        onClick={() => setIsMenuOpen(false)}
+                                    >
+                                        <User className="w-5 h-5" />
+                                        {user.name}
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        href="/login"
+                                        className="flex items-center justify-center gap-2 px-4 py-3 bg-[#FE8C00] text-white rounded-full hover:bg-[#E67D00] transition-colors font-medium"
+                                        onClick={() => setIsMenuOpen(false)}
+                                    >
+                                        <User className="w-5 h-5" />
+                                        Sign In
+                                    </Link>
+                                )
+                            )}
                         </div>
                     </div>
                 )}
